@@ -5,7 +5,7 @@ import (
 	"crypto/tls"
 	"net/http"
 
-	. "github.com/homedepot/arcade/pkg/rancher"
+	. "github.com/homedepot/arcade/internal/rancher"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -15,10 +15,10 @@ import (
 var _ = Describe("Client", func() {
 	var (
 		server   *ghttp.Server
-		client   Client
+		client   *Client
 		username string
 		password string
-		k        KubeconfigToken
+		t        string
 		err      error
 	)
 
@@ -38,7 +38,7 @@ var _ = Describe("Client", func() {
 		})
 
 		JustBeforeEach(func() {
-			k, err = client.NewToken(context.Background())
+			t, err = client.Token(context.Background())
 		})
 
 		When("the uri is invalid", func() {
@@ -101,7 +101,7 @@ var _ = Describe("Client", func() {
 
 			It("succeeds", func() {
 				Expect(err).To(BeNil())
-				Expect(k.Token).To(Equal("kubeconfig-u-i76rfanbw5:ltqlpxqz5hh52sxfxfbxxkk6xw7pzkh7d922cww6m9x6fjskskxwl9"))
+				Expect(t).To(Equal("kubeconfig-u-i76rfanbw5:ltqlpxqz5hh52sxfxfbxxkk6xw7pzkh7d922cww6m9x6fjskskxwl9"))
 			})
 		})
 
@@ -119,7 +119,7 @@ var _ = Describe("Client", func() {
 
 			It("succeeds", func() {
 				Expect(err).To(BeNil())
-				Expect(k.Token).To(Equal("kubeconfig-u-i76rfanbw5:ltqlpxqz5hh52sxfxfbxxkk6xw7pzkh7d922cww6m9x6fjskskxwl9"))
+				Expect(t).To(Equal("kubeconfig-u-i76rfanbw5:ltqlpxqz5hh52sxfxfbxxkk6xw7pzkh7d922cww6m9x6fjskskxwl9"))
 			})
 		})
 
@@ -140,7 +140,7 @@ var _ = Describe("Client", func() {
 
 			It("succeeds", func() {
 				Expect(err).To(BeNil())
-				Expect(k.Token).To(Equal("kubeconfig-u-i76rfanbw5:ltqlpxqz5hh52sxfxfbxxkk6xw7pzkh7d922cww6m9x6fjskskxwl9"))
+				Expect(t).To(Equal("kubeconfig-u-i76rfanbw5:ltqlpxqz5hh52sxfxfbxxkk6xw7pzkh7d922cww6m9x6fjskskxwl9"))
 			})
 		})
 
@@ -157,7 +157,7 @@ var _ = Describe("Client", func() {
 
 			It("succeeds", func() {
 				Expect(err).To(BeNil())
-				Expect(k.Token).To(Equal("kubeconfig-u-i76rfanbw5:ltqlpxqz5hh52sxfxfbxxkk6xw7pzkh7d922cww6m9x6fjskskxwl9"))
+				Expect(t).To(Equal("kubeconfig-u-i76rfanbw5:ltqlpxqz5hh52sxfxfbxxkk6xw7pzkh7d922cww6m9x6fjskskxwl9"))
 			})
 		})
 	})

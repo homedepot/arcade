@@ -8,10 +8,11 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/homedepot/arcade/pkg/google"
-	arcadehttp "github.com/homedepot/arcade/pkg/http"
-	"github.com/homedepot/arcade/pkg/middleware"
-	"github.com/homedepot/arcade/pkg/rancher"
+	"github.com/homedepot/arcade/internal/google"
+	arcadehttp "github.com/homedepot/arcade/internal/http"
+	"github.com/homedepot/arcade/internal/microsoft"
+	"github.com/homedepot/arcade/internal/middleware"
+	"github.com/homedepot/arcade/internal/rancher"
 )
 
 var (
@@ -19,20 +20,26 @@ var (
 )
 
 func init() {
+	controller := &arcadehttp.Controller{}
+
 	gin.ForceConsoleColor()
 
 	apiKey := mustGetenv("ARCADE_API_KEY")
 	r.Use(middleware.NewApiKeyAuth(apiKey))
 
-	googleClient := google.NewClient()
-	r.Use(middleware.SetGoogleClient(googleClient))
+	controller.GoogleClient = google.NewClient()
 
 	if s := os.Getenv("RANCHER_ENABLED"); s == "TRUE" {
 		rancherClient := mustInstantiateRancherClient()
-		r.Use(middleware.SetRancherClient(rancherClient))
+		controller.RancherClient = rancherClient
 	}
 
-	r.GET("/tokens", arcadehttp.GetToken)
+	if s := os.Getenv("MICROSOFT_ENABLED"); s == "TRUE" {
+		microsoftClient := mustInstantiateMicrosoftClient()
+		controller.MicrosoftClient = microsoftClient
+	}
+
+	r.GET("/tokens", controller.GetToken)
 }
 
 func mustGetenv(env string) (s string) {
@@ -43,7 +50,7 @@ func mustGetenv(env string) (s string) {
 	return
 }
 
-func mustInstantiateRancherClient() rancher.Client {
+func mustInstantiateRancherClient() *rancher.Client {
 	url := mustGetenv("RANCHER_URL")
 	username := mustGetenv("RANCHER_USERNAME")
 	password := mustGetenv("RANCHER_PASSWORD")
@@ -73,10 +80,24 @@ func mustInstantiateRancherClient() rancher.Client {
 	return rancherClient
 }
 
+func mustInstantiateMicrosoftClient() *microsoft.Client {
+	loginEndpoint := mustGetenv("MICROSOFT_LOGIN_ENDPOINT")
+	clientID := mustGetenv("MICROSOFT_CLIENT_ID")
+	clientSecret := mustGetenv("MICROSOFT_CLIENT_SECRET")
+	resource := mustGetenv("MICROSOFT_RESOURCE")
+
+	microsoftClient := microsoft.NewClient()
+	microsoftClient.WithLoginEndpoint(loginEndpoint)
+	microsoftClient.WithClientID(clientID)
+	microsoftClient.WithClientSecret(clientSecret)
+	microsoftClient.WithResource(resource)
+
+	return microsoftClient
+}
+
 // Run arcade on port 1982.
 func main() {
-	err := r.Run(":1982")
-	if err != nil {
-		panic(err)
+	if err := r.Run(":1982"); err != nil {
+		log.Fatal(err)
 	}
 }
