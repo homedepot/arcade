@@ -21,7 +21,6 @@ type NewTokenRequest struct {
 var (
 	errNotFoundFormat = "error getting token: %s"
 	mux               sync.Mutex
-	expiration        time.Time
 	cachedToken       KubeconfigToken
 )
 
