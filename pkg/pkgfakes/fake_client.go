@@ -21,11 +21,6 @@ type FakeClient struct {
 		result1 string
 		result2 error
 	}
-	WithAPIKeyStub        func(string)
-	withAPIKeyMutex       sync.RWMutex
-	withAPIKeyArgsForCall []struct {
-		arg1 string
-	}
 	invocations      map[string][][]interface{}
 	invocationsMutex sync.RWMutex
 }
@@ -94,45 +89,11 @@ func (fake *FakeClient) TokenReturnsOnCall(i int, result1 string, result2 error)
 	}{result1, result2}
 }
 
-func (fake *FakeClient) WithAPIKey(arg1 string) {
-	fake.withAPIKeyMutex.Lock()
-	fake.withAPIKeyArgsForCall = append(fake.withAPIKeyArgsForCall, struct {
-		arg1 string
-	}{arg1})
-	stub := fake.WithAPIKeyStub
-	fake.recordInvocation("WithAPIKey", []interface{}{arg1})
-	fake.withAPIKeyMutex.Unlock()
-	if stub != nil {
-		fake.WithAPIKeyStub(arg1)
-	}
-}
-
-func (fake *FakeClient) WithAPIKeyCallCount() int {
-	fake.withAPIKeyMutex.RLock()
-	defer fake.withAPIKeyMutex.RUnlock()
-	return len(fake.withAPIKeyArgsForCall)
-}
-
-func (fake *FakeClient) WithAPIKeyCalls(stub func(string)) {
-	fake.withAPIKeyMutex.Lock()
-	defer fake.withAPIKeyMutex.Unlock()
-	fake.WithAPIKeyStub = stub
-}
-
-func (fake *FakeClient) WithAPIKeyArgsForCall(i int) string {
-	fake.withAPIKeyMutex.RLock()
-	defer fake.withAPIKeyMutex.RUnlock()
-	argsForCall := fake.withAPIKeyArgsForCall[i]
-	return argsForCall.arg1
-}
-
 func (fake *FakeClient) Invocations() map[string][][]interface{} {
 	fake.invocationsMutex.RLock()
 	defer fake.invocationsMutex.RUnlock()
 	fake.tokenMutex.RLock()
 	defer fake.tokenMutex.RUnlock()
-	fake.withAPIKeyMutex.RLock()
-	defer fake.withAPIKeyMutex.RUnlock()
 	copiedInvocations := map[string][][]interface{}{}
 	for key, value := range fake.invocations {
 		copiedInvocations[key] = value
