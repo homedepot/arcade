@@ -37,6 +37,22 @@ var _ = Describe("Controller", func() {
 			})
 		})
 
+		When("no files exist", func() {
+			BeforeEach(func() {
+				dir = "empty-dir"
+				_ = os.Mkdir(dir, 0666)
+			})
+
+			AfterEach(func() {
+				os.Remove(dir)
+			})
+
+			It("returns an error", func() {
+				Expect(err).ToNot(BeNil())
+				Expect(err.Error()).To(Equal("no token providers found in directory: empty-dir"))
+			})
+		})
+
 		When("a file exists with bad json", func() {
 			var tmpFile *os.File
 

@@ -71,6 +71,10 @@ func NewController(dir string) (Controller, error) {
 		return controller, err
 	}
 
+	if len(files) == 0 {
+		return controller, fmt.Errorf("no token providers found in directory: %s", dir)
+	}
+
 	for _, f := range files {
 		if !f.IsDir() {
 			path := filepath.Join(dir, f.Name())
