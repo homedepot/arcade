@@ -12,7 +12,7 @@ const (
 	defaultURL = `http://localhost:1982`
 )
 
-//go:generate counterfeiter . Client
+//go:generate counterfeiter -o arcadefakes . Client
 type Client interface {
 	Token(string) (string, error)
 }
