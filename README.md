@@ -16,7 +16,7 @@ Token provider configuration files containing the credentials are placed in the 
 
 Using google's [Workload Identity](https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity), Arcade retrieves the token of the active GCP account.
 
-```json
+```json5
 {
   "type": "", // Required, set to 'google'
   "name": ""  // Required, set to a unique name identifying this token provider
@@ -27,7 +27,7 @@ Using google's [Workload Identity](https://cloud.google.com/kubernetes-engine/do
 
 Use this JSON structure to configure a Microsoft token provider
 
-```json
+```json5
 {
   "type": "",          // Required, set to 'microsoft'
   "name": "",          // Required, set to a unique name identifying this token provider
@@ -42,7 +42,7 @@ Use this JSON structure to configure a Microsoft token provider
 
 Use this JSON structure to configure a Rancher token provider
 
-```json
+```json5
 {
   "type": "",     // Required, set to 'rancher'
   "name": "",     // Required, set to a unique name identifying this token provider
