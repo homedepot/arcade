@@ -20,8 +20,6 @@ type NewTokenRequest struct {
 
 var (
 	errNotFoundFormat = "error getting token: %s"
-	mux               sync.Mutex
-	cachedToken       KubeconfigToken
 )
 
 func NewClient() *Client {
@@ -31,10 +29,12 @@ func NewClient() *Client {
 }
 
 type Client struct {
-	url      string
-	username string
-	password string
-	c        *http.Client
+	url         string
+	username    string
+	password    string
+	c           *http.Client
+	mux         sync.Mutex
+	cachedToken KubeconfigToken
 }
 
 func (c *Client) WithURL(url string) {
@@ -54,10 +54,10 @@ func (c *Client) WithTransport(transport *http.Transport) {
 }
 
 func (c *Client) Token(ctx context.Context) (string, error) {
-	mux.Lock()
-	defer mux.Unlock()
+	c.mux.Lock()
+	defer c.mux.Unlock()
 
-	if time.Now().In(time.UTC).After(cachedToken.ExpiresAt) || cachedToken.Token == "" {
+	if time.Now().In(time.UTC).After(c.cachedToken.ExpiresAt) || c.cachedToken.Token == "" {
 		k := KubeconfigToken{}
 
 		data := NewTokenRequest{
@@ -97,8 +97,8 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 			return "", err
 		}
 
-		cachedToken = k
+		c.cachedToken = k
 	}
 
-	return cachedToken.Token, nil
+	return c.cachedToken.Token, nil
 }

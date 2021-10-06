@@ -32,3 +32,13 @@ const payloadKubeconfigToken = `{
   "userPrincipal": "map[metadata:map[creationTimestamp:<nil>]]",
   "uuid": "bf897e53-3cb3-49d0-af44-09343f75ec2e"
 }`
+
+const payloadKubeconfigTokenCached = `{
+	"expiresAt": "9999-12-31T00:00:00Z",
+	"token": "fake.token.cached"
+}`
+
+const payloadKubeconfigTokenAnother = `{
+	"expiresAt": "2999-01-01T00:00:00Z",
+	"token": "another.token"
+}`

@@ -144,6 +144,26 @@ var _ = Describe("Client", func() {
 			})
 		})
 
+		When("the token is cached", func() {
+			BeforeEach(func() {
+				json := `{"responseType": "kubeconfig","username": "test-user","password": "test-pass"}`
+				server.AppendHandlers(ghttp.CombineHandlers(
+					ghttp.VerifyRequest("POST", "/"),
+					ghttp.VerifyJSON(json),
+					ghttp.VerifyHeaderKV("accept", "application/json"),
+					ghttp.RespondWith(http.StatusCreated, payloadKubeconfigTokenCached),
+				))
+			})
+
+			It("succeeds", func() {
+				Expect(err).To(BeNil())
+				Expect(t).To(Equal("fake.token.cached"))
+				// Second call returns cached token
+				t2, _ := client.Token(context.Background())
+				Expect(t2).To(Equal("fake.token.cached"))
+			})
+		})
+
 		When("it succeeds", func() {
 			BeforeEach(func() {
 				json := `{"responseType": "kubeconfig","username": "test-user","password": "test-pass"}`
@@ -158,6 +178,44 @@ var _ = Describe("Client", func() {
 			It("succeeds", func() {
 				Expect(err).To(BeNil())
 				Expect(t).To(Equal("kubeconfig-u-i76rfanbw5:ltqlpxqz5hh52sxfxfbxxkk6xw7pzkh7d922cww6m9x6fjskskxwl9"))
+			})
+		})
+
+		When("there is another client", func() {
+			var anotherclient *Client
+
+			BeforeEach(func() {
+				// Call to server for first client.
+				json := `{"responseType": "kubeconfig","username": "test-user","password": "test-pass"}`
+				server.AppendHandlers(ghttp.CombineHandlers(
+					ghttp.VerifyRequest("POST", "/"),
+					ghttp.VerifyJSON(json),
+					ghttp.VerifyHeaderKV("accept", "application/json"),
+					ghttp.RespondWith(http.StatusCreated, payloadKubeconfigToken),
+				))
+				// Call to server for second client.
+				anotherclient = NewClient()
+				anotherclient.WithURL(server.URL())
+				anotherclient.WithUsername("another-test-user")
+				anotherclient.WithPassword("another-test-pass")
+				json = `{"responseType": "kubeconfig","username": "another-test-user","password": "another-test-pass"}`
+				server.AppendHandlers(ghttp.CombineHandlers(
+					ghttp.VerifyRequest("POST", "/"),
+					ghttp.VerifyJSON(json),
+					ghttp.VerifyHeaderKV("accept", "application/json"),
+					ghttp.RespondWith(http.StatusCreated, payloadKubeconfigTokenAnother),
+				))
+			})
+
+			It("succeeds", func() {
+				// Validae first client.
+				Expect(err).To(BeNil())
+				Expect(t).To(Equal("kubeconfig-u-i76rfanbw5:ltqlpxqz5hh52sxfxfbxxkk6xw7pzkh7d922cww6m9x6fjskskxwl9"))
+
+				// Validate another client.
+				t, err = anotherclient.Token(context.Background())
+				Expect(err).To(BeNil())
+				Expect(t).To(Equal("another.token"))
 			})
 		})
 	})

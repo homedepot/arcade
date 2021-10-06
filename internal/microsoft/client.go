@@ -13,12 +13,6 @@ import (
 	"time"
 )
 
-var (
-	mux         sync.Mutex
-	expiration  time.Time
-	cachedToken string
-)
-
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . Client
 
 // Client makes a request for a client token.
@@ -28,15 +22,16 @@ type Client struct {
 	clientSecret  string
 	resource      string
 	loginEndpoint string
+	mux           sync.Mutex
+	expiration    time.Time
+	cachedToken   string
 }
 
 // NewClient returns an implementation of Client using a default http client.
 func NewClient() *Client {
-	// Reset expiration for a new client instance.
-	expiration = time.Time{}
-
 	return &Client{
-		c: http.DefaultClient,
+		c:          http.DefaultClient,
+		expiration: time.Time{}, // Reset expiration for a new client instance.
 	}
 }
 
@@ -63,11 +58,11 @@ type errorResponse struct {
 // Token returns a cached token if it has not expired, otherwise it
 // retrieves a new access token and sets the cached token.
 func (c *Client) Token(ctx context.Context) (string, error) {
-	mux.Lock()
-	defer mux.Unlock()
+	c.mux.Lock()
+	defer c.mux.Unlock()
 	// If the cached token has not expired just return it.
-	if time.Now().In(time.UTC).Before(expiration) {
-		return cachedToken, nil
+	if time.Now().In(time.UTC).Before(c.expiration) {
+		return c.cachedToken, nil
 	}
 
 	data := url.Values{}
@@ -120,16 +115,16 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("microsoft: error unmarshaling body: %w", err)
 	}
 
-	cachedToken = t.AccessToken
+	c.cachedToken = t.AccessToken
 
 	expiresIn, err := strconv.Atoi(t.ExpiresIn)
 	if err != nil {
 		return "", fmt.Errorf("microsoft: error converting expiresIn field for token: %s", err)
 	}
 	// Set expiration to 90% of expires in time.
-	expiration = time.Now().In(time.UTC).Add(time.Second * time.Duration((expiresIn/10)*9))
+	c.expiration = time.Now().In(time.UTC).Add(time.Second * time.Duration((expiresIn/10)*9))
 
-	return cachedToken, nil
+	return c.cachedToken, nil
 }
 
 // WithClientID sets the client ID.

@@ -158,4 +158,60 @@ var _ = Describe("Client", func() {
 			})
 		})
 	})
+
+	When("there is another client", func() {
+		var anotherclient *Client
+
+		BeforeEach(func() {
+			// Call to server for first client.
+			res := `{
+				"token_type": "Bearer",
+				"expires_in": "3599",
+				"ext_expires_in": "3599",
+				"expires_on": "1621369811",
+				"not_before": "1621365911",
+				"resource": "https://graph.microsoft.com",
+				"access_token": "fake.bearer.token"
+			}`
+
+			server.AppendHandlers(ghttp.CombineHandlers(
+				ghttp.VerifyRequest(http.MethodPost, "/"),
+				ghttp.RespondWith(http.StatusOK, res),
+			))
+
+			// Call to server for second client.
+			anotherclient = NewClient()
+			anotherclient.WithLoginEndpoint(server.URL())
+			anotherclient.WithClientID("another-fake-client-id")
+			anotherclient.WithClientSecret("antoher-fake-client-secret")
+			anotherclient.WithResource("anotherfake-resource")
+
+			// Call to server for first client.
+			res = `{
+				"token_type": "Bearer",
+				"expires_in": "3599",
+				"ext_expires_in": "3599",
+				"expires_on": "1621369811",
+				"not_before": "1621365911",
+				"resource": "https://graph.microsoft.com",
+				"access_token": "another.fake.bearer.token"
+			}`
+
+			server.AppendHandlers(ghttp.CombineHandlers(
+				ghttp.VerifyRequest(http.MethodPost, "/"),
+				ghttp.RespondWith(http.StatusOK, res),
+			))
+		})
+
+		It("succeeds", func() {
+			// Validae first client.
+			Expect(err).To(BeNil())
+			Expect(token).To(Equal("fake.bearer.token"))
+
+			// Validate another client.
+			token, err = anotherclient.Token(context.Background())
+			Expect(err).To(BeNil())
+			Expect(token).To(Equal("fake.bearer.token"))
+		})
+	})
 })
