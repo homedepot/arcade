@@ -59,7 +59,7 @@ Rancher kubeconfig tokens have an expiration time and Arcade will cache the toke
 
 Prerequisites:
 - the [gcloud CLI](https://cloud.google.com/sdk/gcloud#download_and_install_the) must be installed
-- you'll need [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default/login) set up
+- you'll need [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default/login) set up and run `gcloud auth application-default login`
 
 Run the following commands to build and generate a token.
 
