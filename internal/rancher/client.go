@@ -29,20 +29,22 @@ func NewClient() *Client {
 }
 
 type Client struct {
-	c           *http.Client
-	cachedToken KubeconfigToken
-	mux         sync.Mutex
-	password    string
-	timeout     time.Duration
-	url         string
-	username    string
+	c               *http.Client
+	cachedToken     KubeconfigToken
+	mux             sync.Mutex
+	password        string
+	shortExpiration int // seconds for the expiration
+	timeout         time.Duration
+	url             string
+	username        string
 }
 
 func (c *Client) Token(ctx context.Context) (string, error) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 
-	if time.Now().In(time.UTC).After(c.cachedToken.ExpiresAt) || c.cachedToken.Token == "" {
+	tokenExpired := int(time.Since(c.cachedToken.Created.In(time.UTC)).Seconds()) > c.shortExpiration
+	if time.Now().In(time.UTC).After(c.cachedToken.ExpiresAt) || c.cachedToken.Token == "" || tokenExpired {
 		k := KubeconfigToken{}
 
 		data := NewTokenRequest{
@@ -113,4 +115,9 @@ func (c *Client) WithURL(url string) {
 // WithUsername sets the username.
 func (c *Client) WithUsername(username string) {
 	c.username = username
+}
+
+// WithShortExpiration sets the expiration time used for requesting a fresh token.
+func (c *Client) WithShortExpiration(shortExpiration int) {
+	c.shortExpiration = shortExpiration
 }
