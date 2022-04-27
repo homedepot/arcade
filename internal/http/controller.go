@@ -179,10 +179,12 @@ func NewController(dir string) (Controller, error) {
 				client.WithURL(p.URL)
 				client.WithUsername(p.Username)
 				client.WithPassword(p.Password)
+				client.WithTimeout(time.Second * DefaultTimeoutSeconds)
+
 				if p.ShortExpiration > 0 {
 					client.WithShortExpiration(p.ShortExpiration)
 				}
-				client.WithTimeout(time.Second * DefaultTimeoutSeconds)
+
 				controller.Tokenizers[p.Name] = client
 			default:
 				return controller, fmt.Errorf("unsupported token provider type: %s", p.Type)

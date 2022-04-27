@@ -32,7 +32,7 @@ func init() {
 	}
 
 	apiKey := mustGetenv("ARCADE_API_KEY")
-	r.Use(middleware.NewApiKeyAuth(apiKey))
+	r.Use(middleware.NewAPIKeyAuth(apiKey))
 
 	r.GET("/tokens", controller.GetToken)
 }
