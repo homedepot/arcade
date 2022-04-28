@@ -50,6 +50,7 @@ var _ = Describe("Client", func() {
 
 			It("returns an error", func() {
 				Expect(err).ToNot(BeNil())
+				Expect(server.ReceivedRequests()).To(HaveLen(0))
 			})
 		})
 
@@ -60,6 +61,7 @@ var _ = Describe("Client", func() {
 
 			It("returns an error", func() {
 				Expect(err).ToNot(BeNil())
+				Expect(server.ReceivedRequests()).To(HaveLen(0))
 			})
 		})
 
@@ -73,6 +75,7 @@ var _ = Describe("Client", func() {
 			It("returns an error", func() {
 				Expect(err).ToNot(BeNil())
 				Expect(err.Error()).To(Equal("error getting token: 404 Not Found"))
+				Expect(server.ReceivedRequests()).To(HaveLen(1))
 			})
 		})
 
@@ -86,6 +89,7 @@ var _ = Describe("Client", func() {
 			It("returns an error", func() {
 				Expect(err).ToNot(BeNil())
 				Expect(err.Error()).To(Equal("invalid character ';' looking for beginning of object key string"))
+				Expect(server.ReceivedRequests()).To(HaveLen(1))
 			})
 		})
 
@@ -97,6 +101,7 @@ var _ = Describe("Client", func() {
 			It("returns an error", func() {
 				Expect(err).ToNot(BeNil())
 				Expect(err.Error()).To(HaveSuffix("context deadline exceeded"))
+				Expect(server.ReceivedRequests()).To(HaveLen(0))
 			})
 		})
 
@@ -115,6 +120,7 @@ var _ = Describe("Client", func() {
 			It("succeeds", func() {
 				Expect(err).To(BeNil())
 				Expect(t).To(Equal("kubeconfig-u-i76rfanbw5:ltqlpxqz5hh52sxfxfbxxkk6xw7pzkh7d922cww6m9x6fjskskxwl9"))
+				Expect(server.ReceivedRequests()).To(HaveLen(1))
 			})
 		})
 
@@ -133,6 +139,7 @@ var _ = Describe("Client", func() {
 			It("succeeds", func() {
 				Expect(err).To(BeNil())
 				Expect(t).To(Equal("kubeconfig-u-i76rfanbw5:ltqlpxqz5hh52sxfxfbxxkk6xw7pzkh7d922cww6m9x6fjskskxwl9"))
+				Expect(server.ReceivedRequests()).To(HaveLen(1))
 			})
 		})
 
@@ -154,6 +161,7 @@ var _ = Describe("Client", func() {
 			It("succeeds", func() {
 				Expect(err).To(BeNil())
 				Expect(t).To(Equal("kubeconfig-u-i76rfanbw5:ltqlpxqz5hh52sxfxfbxxkk6xw7pzkh7d922cww6m9x6fjskskxwl9"))
+				Expect(server.ReceivedRequests()).To(HaveLen(1))
 			})
 		})
 
@@ -174,6 +182,7 @@ var _ = Describe("Client", func() {
 				// Second call returns cached token
 				t2, _ := client.Token(context.Background())
 				Expect(t2).To(Equal("fake.token.cached"))
+				Expect(server.ReceivedRequests()).To(HaveLen(1))
 			})
 		})
 
@@ -191,6 +200,7 @@ var _ = Describe("Client", func() {
 			It("succeeds", func() {
 				Expect(err).To(BeNil())
 				Expect(t).To(Equal("kubeconfig-u-i76rfanbw5:ltqlpxqz5hh52sxfxfbxxkk6xw7pzkh7d922cww6m9x6fjskskxwl9"))
+				Expect(server.ReceivedRequests()).To(HaveLen(1))
 			})
 		})
 
@@ -230,6 +240,7 @@ var _ = Describe("Client", func() {
 				t, err = anotherclient.Token(context.Background())
 				Expect(err).To(BeNil())
 				Expect(t).To(Equal("another.token"))
+				Expect(server.ReceivedRequests()).To(HaveLen(2))
 			})
 		})
 
@@ -262,6 +273,7 @@ var _ = Describe("Client", func() {
 				t2, err2 := client.Token(context.Background())
 				Expect(err2).To(BeNil())
 				Expect(t2).To(Equal("another.token"))
+				Expect(server.ReceivedRequests()).To(HaveLen(2))
 			})
 		})
 
@@ -288,7 +300,7 @@ var _ = Describe("Client", func() {
 				t2, err2 := client.Token(context.Background())
 				Expect(err2).To(BeNil())
 				Expect(t2).To(Equal("fake.token.cached"))
-
+				Expect(server.ReceivedRequests()).To(HaveLen(1))
 			})
 		})
 
@@ -307,8 +319,8 @@ var _ = Describe("Client", func() {
 			It("fetches a new token", func() {
 				Expect(err).To(BeNil())
 				Expect(t).To(Equal("kubeconfig-u-i76rfanbw5:ltqlpxqz5hh52sxfxfbxxkk6xw7pzkh7d922cww6m9x6fjskskxwl9"))
+				Expect(server.ReceivedRequests()).To(HaveLen(1))
 			})
 		})
-
 	})
 })

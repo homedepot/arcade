@@ -34,12 +34,13 @@ const payloadKubeconfigToken = `{
 }`
 
 const payloadKubeconfigTokenCached = `{
-	"created": "9999-12-31T00:00:00Z",
+  "created": "2021-03-25T10:38:18Z",
 	"expiresAt": "9999-12-31T00:00:00Z",
 	"token": "fake.token.cached"
 }`
 
 const payloadKubeconfigTokenAnother = `{
+	"created": "2012-12-31T00:00:00Z",
 	"expiresAt": "2999-01-01T00:00:00Z",
 	"token": "another.token"
 }`
