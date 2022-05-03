@@ -28,6 +28,11 @@ func NewClient() *Client {
 	}
 }
 
+func (c *Client) tokenExpired() bool {
+	tokenExpired := c.shortExpiration > 0 && int(time.Since(c.cachedToken.Created.In(time.UTC)).Seconds()) > c.shortExpiration
+	return time.Now().In(time.UTC).After(c.cachedToken.ExpiresAt) || c.cachedToken.Token == "" || tokenExpired
+}
+
 type Client struct {
 	c               *http.Client
 	cachedToken     KubeconfigToken
@@ -43,8 +48,7 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 
-	tokenExpired := c.shortExpiration > 0 && int(time.Since(c.cachedToken.Created.In(time.UTC)).Seconds()) > c.shortExpiration
-	if time.Now().In(time.UTC).After(c.cachedToken.ExpiresAt) || c.cachedToken.Token == "" || tokenExpired {
+	if c.tokenExpired() {
 		k := KubeconfigToken{}
 
 		data := NewTokenRequest{
