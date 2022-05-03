@@ -279,7 +279,7 @@ var _ = Describe("Client", func() {
 
 		When("there is a shortExpiration set and it has not passed and there is a cached token", func() {
 			BeforeEach(func() {
-				client.WithShortExpiration(60)
+				client.WithShortExpiration(9223372040)
 				json := `{"responseType": "kubeconfig","username": "test-user","password": "test-pass"}`
 				server.AppendHandlers(ghttp.CombineHandlers(
 					ghttp.VerifyRequest("POST", "/"),

@@ -43,7 +43,7 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 
-	tokenExpired := int(time.Since(c.cachedToken.Created.In(time.UTC)).Seconds()) > c.shortExpiration
+	tokenExpired := c.shortExpiration > 0 && int(time.Since(c.cachedToken.Created.In(time.UTC)).Seconds()) > c.shortExpiration
 	if time.Now().In(time.UTC).After(c.cachedToken.ExpiresAt) || c.cachedToken.Token == "" || tokenExpired {
 		k := KubeconfigToken{}
 

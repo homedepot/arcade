@@ -180,10 +180,7 @@ func NewController(dir string) (Controller, error) {
 				client.WithUsername(p.Username)
 				client.WithPassword(p.Password)
 				client.WithTimeout(time.Second * DefaultTimeoutSeconds)
-
-				if p.ShortExpiration > 0 {
-					client.WithShortExpiration(p.ShortExpiration)
-				}
+				client.WithShortExpiration(p.ShortExpiration)
 
 				controller.Tokenizers[p.Name] = client
 			default:
