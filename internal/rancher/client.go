@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"sync"
 	"time"
@@ -92,7 +93,7 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 
 		if res.StatusCode != http.StatusCreated {
 			body, _ := ioutil.ReadAll(res.Body) // Probably this error isn't important
-			fmt.Printf("Error Body: %s, %s\n", string(body), res.Status)
+			log.Printf("Error Body: %s, %s\n", string(body), res.Status)
 			// _, _ = io.Copy(ioutil.Discard, res.Body)
 
 			return "", fmt.Errorf(errNotFoundFormat, res.Status)
