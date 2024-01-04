@@ -17,12 +17,6 @@ setup:
 		curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh; \
 		dep ensure; \
 	fi; \
-	if ! command -v golangci-lint > /dev/null 2>&1; then \
-		echo "Installing golangci-lint..."; \
-		curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin latest; \
-	else \
-		echo "golangci-lint is already installed."; \
-	fi
 
 lint:
 	golangci-lint run --skip-files .*_test.go --enable wsl --enable misspell --timeout 180s
