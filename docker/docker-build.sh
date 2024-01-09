@@ -2,18 +2,19 @@
 
 set -o errexit
 
+
 # Builds the base image including the solver dependencies
-build_and_publish_image(){
+build_and_publish_image() {
     export PATH=.:$PATH
-    get-dependencies.sh >/dev/null
-    GOOS=linux GOARCH=amd64 build.sh
+    make setup >/dev/null
+    GOOS=linux GOARCH=amd64 make build
     GCR_TAG="oshomedepot/arcade:${TAG_VERSION}"
     docker build . -f docker/Dockerfile -t ${GCR_TAG}
     echo "Image ${GCR_TAG} built..."
     docker push ${GCR_TAG}
 }
 
-print_help(){
+print_help() {
     echo ""
     echo "docker/build.sh -v [VERSION] - Builds the docker image"
     echo ""
@@ -44,7 +45,6 @@ while [[ $# -gt 0 ]]; do
             exit 0
             ;;
         --help)
-            shift
             print_help
             exit 0
             ;;

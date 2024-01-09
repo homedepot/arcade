@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -92,7 +92,7 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode < 200 || res.StatusCode > 399 {
-		body, err := ioutil.ReadAll(res.Body)
+		body, err := io.ReadAll(res.Body)
 		if err != nil {
 			return "", fmt.Errorf("microsoft: error getting token: %s", res.Status)
 		}
@@ -107,7 +107,7 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("microsoft: error getting token: %s", e.ErrorDescription)
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return "", fmt.Errorf("microsoft: error reading body: %w", err)
 	}

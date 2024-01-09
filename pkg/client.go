@@ -3,7 +3,7 @@ package arcade
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 )
@@ -64,7 +64,7 @@ func (c *client) Token(tokenProvider string) (string, error) {
 		Token string `json:"token"`
 	}
 
-	b, err := ioutil.ReadAll(res.Body)
+	b, err := io.ReadAll(res.Body)
 	if err != nil {
 		return "", err
 	}

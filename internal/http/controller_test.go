@@ -1,7 +1,7 @@
 package http_test
 
 import (
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 
@@ -18,7 +18,7 @@ var _ = Describe("Controller", func() {
 
 	BeforeEach(func() {
 		dir = "test"
-		log.SetOutput(ioutil.Discard)
+		log.SetOutput(io.Discard)
 	})
 
 	Describe("#NewController", func() {
@@ -57,7 +57,7 @@ var _ = Describe("Controller", func() {
 			var tmpFile *os.File
 
 			BeforeEach(func() {
-				tmpFile, err = ioutil.TempFile("test", "cred*.json")
+				tmpFile, err = os.CreateTemp("test", "cred*.json")
 			})
 
 			AfterEach(func() {
@@ -74,7 +74,7 @@ var _ = Describe("Controller", func() {
 			var tmpFile *os.File
 
 			BeforeEach(func() {
-				tmpFile, err = ioutil.TempFile("test", "provider*.json")
+				tmpFile, err = os.CreateTemp("test", "provider*.json")
 				_, err = tmpFile.WriteString("{}")
 				Expect(err).To(BeNil())
 			})
@@ -93,7 +93,7 @@ var _ = Describe("Controller", func() {
 			var tmpFile *os.File
 
 			BeforeEach(func() {
-				tmpFile, err = ioutil.TempFile("test", "provider*.json")
+				tmpFile, err = os.CreateTemp("test", "provider*.json")
 				_, err = tmpFile.WriteString(`{
 					"name": "google-test"
 				}`)
@@ -114,7 +114,7 @@ var _ = Describe("Controller", func() {
 			var tmpFile *os.File
 
 			BeforeEach(func() {
-				tmpFile, err = ioutil.TempFile("test", "provider*.json")
+				tmpFile, err = os.CreateTemp("test", "provider*.json")
 				_, err = tmpFile.WriteString(`{
           "type": "microsoft",
 					"name": "test",
@@ -139,7 +139,7 @@ var _ = Describe("Controller", func() {
 			var tmpFile *os.File
 
 			BeforeEach(func() {
-				tmpFile, err = ioutil.TempFile("test", "provider*.json")
+				tmpFile, err = os.CreateTemp("test", "provider*.json")
 				_, err = tmpFile.WriteString(`{
           "type": "microsoft",
 					"name": "test",
@@ -164,7 +164,7 @@ var _ = Describe("Controller", func() {
 			var tmpFile *os.File
 
 			BeforeEach(func() {
-				tmpFile, err = ioutil.TempFile("test", "provider*.json")
+				tmpFile, err = os.CreateTemp("test", "provider*.json")
 				_, err = tmpFile.WriteString(`{
           "type": "microsoft",
 					"name": "test",
@@ -189,7 +189,7 @@ var _ = Describe("Controller", func() {
 			var tmpFile *os.File
 
 			BeforeEach(func() {
-				tmpFile, err = ioutil.TempFile("test", "provider*.json")
+				tmpFile, err = os.CreateTemp("test", "provider*.json")
 				_, err = tmpFile.WriteString(`{
           "type": "microsoft",
 					"name": "test",
@@ -214,7 +214,7 @@ var _ = Describe("Controller", func() {
 			var tmpFile *os.File
 
 			BeforeEach(func() {
-				tmpFile, err = ioutil.TempFile("test", "provider*.json")
+				tmpFile, err = os.CreateTemp("test", "provider*.json")
 				_, err = tmpFile.WriteString(`{
           "type": "rancher",
 					"name": "test",
@@ -238,7 +238,7 @@ var _ = Describe("Controller", func() {
 			var tmpFile *os.File
 
 			BeforeEach(func() {
-				tmpFile, err = ioutil.TempFile("test", "provider*.json")
+				tmpFile, err = os.CreateTemp("test", "provider*.json")
 				_, err = tmpFile.WriteString(`{
           "type": "rancher",
 					"name": "test",
@@ -262,7 +262,7 @@ var _ = Describe("Controller", func() {
 			var tmpFile *os.File
 
 			BeforeEach(func() {
-				tmpFile, err = ioutil.TempFile("test", "provider*.json")
+				tmpFile, err = os.CreateTemp("test", "provider*.json")
 				_, err = tmpFile.WriteString(`{
           "type": "rancher",
 					"name": "test",

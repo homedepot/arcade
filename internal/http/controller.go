@@ -6,8 +6,8 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -69,7 +69,7 @@ func NewController(dir string) (Controller, error) {
 		Tokenizers: map[string]Tokenizer{},
 	}
 
-	files, err := ioutil.ReadDir(dir)
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		return controller, err
 	}
@@ -88,7 +88,7 @@ func NewController(dir string) (Controller, error) {
 				path = ln
 			}
 
-			b, err := ioutil.ReadFile(path)
+			b, err := os.ReadFile(path)
 			if err != nil {
 				// Just continue if we're not able to read the 'file' as the file might be a symlink to
 				// a dir when using kubernetes ConfigMaps, for example:

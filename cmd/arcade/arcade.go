@@ -48,6 +48,7 @@ func mustGetenv(env string) (s string) {
 // Run arcade on port 1982.
 func main() {
 	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile)
+
 	if err := r.Run(":1982"); err != nil {
 		log.Fatal(err)
 	}

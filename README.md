@@ -18,8 +18,8 @@ Using google's [Workload Identity](https://cloud.google.com/kubernetes-engine/do
 
 ```json5
 {
-  "type": "", // Required, set to 'google'
-  "name": ""  // Required, set to a unique name identifying this token provider
+  type: "", // Required, set to 'google'
+  name: "", // Required, set to a unique name identifying this token provider
 }
 ```
 
@@ -29,12 +29,12 @@ Use this JSON structure to configure a Microsoft token provider
 
 ```json5
 {
-  "type": "",          // Required, set to 'microsoft'
-  "name": "",          // Required, set to a unique name identifying this token provider
-  "loginEndpoint": "", // Reqoured, set to the 'login' endpoint, such as https://login.microsoftonline.com/someone.onmicrosoft.com/oauth2/token
-  "clientId": "",      // Required, set to your Microsoft Client ID
-  "clientSecret": "",  // Required, set to your Microsoft Client Secret
-  "resource": ""       // Optional, set to the resource you are requesting, such as 'https://graph.microsoft.com'
+  type: "", // Required, set to 'microsoft'
+  name: "", // Required, set to a unique name identifying this token provider
+  loginEndpoint: "", // Reqoured, set to the 'login' endpoint, such as https://login.microsoftonline.com/someone.onmicrosoft.com/oauth2/token
+  clientId: "", // Required, set to your Microsoft Client ID
+  clientSecret: "", // Required, set to your Microsoft Client Secret
+  resource: "", // Optional, set to the resource you are requesting, such as 'https://graph.microsoft.com'
 }
 ```
 
@@ -44,12 +44,12 @@ Use this JSON structure to configure a Rancher token provider
 
 ```json5
 {
-  "type": "",     // Required, set to 'rancher'
-  "name": "",     // Required, set to a unique name identifying this token provider
-  "url": "",      // Reqoured, set to the 'login' endpoint of your Rancher instance
-  "username": "", // Required, set to your Rancher username
-  "password": "", // Required, set to your Rancher upassword
-  "rootCA": ""    // Optional, set to a certificate to add to the trusted root CAs
+  type: "", // Required, set to 'rancher'
+  name: "", // Required, set to a unique name identifying this token provider
+  url: "", // Reqoured, set to the 'login' endpoint of your Rancher instance
+  username: "", // Required, set to your Rancher username
+  password: "", // Required, set to your Rancher upassword
+  rootCA: "", // Optional, set to a certificate to add to the trusted root CAs
 }
 ```
 
@@ -58,6 +58,7 @@ Rancher kubeconfig tokens have an expiration time and Arcade will cache the toke
 ## Run Locally
 
 Prerequisites:
+
 - the [gcloud CLI](https://cloud.google.com/sdk/gcloud#download_and_install_the) must be installed
 - you'll need [Application Default Credentials](https://cloud.google.com/sdk/gcloud/reference/auth/application-default/login) set up and run `gcloud auth application-default login`
 
@@ -66,8 +67,8 @@ Run the following commands to build and generate a token.
 ### Build
 
 ```bash
-./get-dependencies.sh
-./build.sh
+make setup
+make build
 ```
 
 ### Run
@@ -106,18 +107,25 @@ echo '{
 ### Test
 
 **Google**
+
 ```bash
 curl localhost:1982/tokens?provider=google -H "Api-Key: test"
 ```
+
 The default token provider is google, so this is equivalent to the call above
+
 ```bash
 curl localhost:1982/tokens -H "Api-Key: test"
 ```
+
 **Microsoft**
+
 ```bash
 curl localhost:1982/tokens?provider=microsoftonline -H "Api-Key: test"
 ```
+
 **Rancher**
+
 ```bash
 curl localhost:1982/tokens?provider=rancher.example.com -H "Api-Key: test"
 ```

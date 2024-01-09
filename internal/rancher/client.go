@@ -33,16 +33,17 @@ func (c *Client) tokenExpired() bool {
 
 	expiredAtString := c.cachedToken.ExpiresAt
 	if expiredAtString == "" {
-
 		return time.Now().In(time.UTC).After(time.UnixMilli(c.cachedToken.CreatedTS+int64(c.cachedToken.TTL))) || c.cachedToken.Token == "" || tokenExpired
-
-	} else {
-		expiredAt, _ := time.Parse(time.RFC3339, expiredAtString)
-
-		return time.Now().In(time.UTC).After(expiredAt) || c.cachedToken.Token == "" || tokenExpired
-
 	}
 
+	// parse the expiration time in RFC3339 format
+	expiredAt, _ := time.Parse(time.RFC3339, expiredAtString)
+
+	// calculate whether the token is expired based on the parsed time
+	isExpired := time.Now().In(time.UTC).After(expiredAt) || tokenExpired
+
+	// return the result with an additional check for empty token
+	return isExpired || c.cachedToken.Token == ""
 }
 
 type Client struct {
@@ -79,7 +80,7 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 		// Create the request.
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, c.url, bytes.NewBuffer(b))
 		if err != nil {
-			log.Printf("NewRequestWithContext(%s), err=%s\n", c.url, err);
+			log.Printf("NewRequestWithContext(%s), err=%s\n", c.url, err)
 			return "", err
 		}
 
@@ -88,18 +89,19 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 
 		res, err := c.c.Do(req)
 		if err != nil {
-			log.Printf("Do(%s), err=%s\n", c.url, err);
+			log.Printf("Do(%s), err=%s\n", c.url, err)
 			return "", err
 		}
 		defer res.Body.Close()
 
 		if res.StatusCode != http.StatusCreated {
 			buf := make([]byte, 100)
+
 			_, err := io.ReadFull(res.Body, buf)
 			if err != nil && err != io.ErrUnexpectedEOF {
-				log.Printf("Do(%s), StatusCode=%d, failed to read body: %s\n", c.url, res.StatusCode, err);
+				log.Printf("Do(%s), StatusCode=%d, failed to read body: %s\n", c.url, res.StatusCode, err)
 			} else {
-				log.Printf("Do(%s), StatusCode=%d, body: %s\n", c.url, res.StatusCode, buf);
+				log.Printf("Do(%s), StatusCode=%d, body: %s\n", c.url, res.StatusCode, buf)
 				_, _ = io.Copy(io.Discard, res.Body)
 			}
 

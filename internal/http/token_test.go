@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 
@@ -79,7 +79,7 @@ var _ = Describe("Token", func() {
 
 			It("succeeds", func() {
 				Expect(res.StatusCode).To(Equal(http.StatusBadRequest))
-				b, _ := ioutil.ReadAll(res.Body)
+				b, _ := io.ReadAll(res.Body)
 				_ = json.Unmarshal(b, &tokens)
 				Expect(tokens.Error).To(Equal("Unsupported token provider: fake"))
 			})
@@ -98,7 +98,7 @@ var _ = Describe("Token", func() {
 
 			It("returns an internal server error", func() {
 				Expect(res.StatusCode).To(Equal(http.StatusInternalServerError))
-				b, _ := ioutil.ReadAll(res.Body)
+				b, _ := io.ReadAll(res.Body)
 				_ = json.Unmarshal(b, &tokens)
 				Expect(tokens.Error).To(Equal("error getting token from google"))
 			})
@@ -111,7 +111,7 @@ var _ = Describe("Token", func() {
 
 			It("defaults to google", func() {
 				Expect(res.StatusCode).To(Equal(http.StatusOK))
-				b, _ := ioutil.ReadAll(res.Body)
+				b, _ := io.ReadAll(res.Body)
 				_ = json.Unmarshal(b, &tokens)
 				Expect(tokens.Token).To(Equal("valid-google-token"))
 			})
@@ -120,7 +120,7 @@ var _ = Describe("Token", func() {
 		When("it succeeds", func() {
 			It("succeeds", func() {
 				Expect(res.StatusCode).To(Equal(http.StatusOK))
-				b, _ := ioutil.ReadAll(res.Body)
+				b, _ := io.ReadAll(res.Body)
 				_ = json.Unmarshal(b, &tokens)
 				Expect(tokens.Token).To(Equal("valid-google-token"))
 			})
@@ -139,7 +139,7 @@ var _ = Describe("Token", func() {
 
 			It("returns a bad request error", func() {
 				Expect(res.StatusCode).To(Equal(http.StatusBadRequest))
-				b, _ := ioutil.ReadAll(res.Body)
+				b, _ := io.ReadAll(res.Body)
 				_ = json.Unmarshal(b, &tokens)
 				Expect(tokens.Error).To(Equal("Unsupported token provider: microsoft"))
 			})
@@ -152,7 +152,7 @@ var _ = Describe("Token", func() {
 
 			It("returns an internal server error", func() {
 				Expect(res.StatusCode).To(Equal(http.StatusInternalServerError))
-				b, _ := ioutil.ReadAll(res.Body)
+				b, _ := io.ReadAll(res.Body)
 				_ = json.Unmarshal(b, &tokens)
 				Expect(tokens.Error).To(Equal("error getting token from microsoft"))
 			})
@@ -161,7 +161,7 @@ var _ = Describe("Token", func() {
 		When("it succeeds", func() {
 			It("succeeds", func() {
 				Expect(res.StatusCode).To(Equal(http.StatusOK))
-				b, _ := ioutil.ReadAll(res.Body)
+				b, _ := io.ReadAll(res.Body)
 				_ = json.Unmarshal(b, &tokens)
 				Expect(tokens.Token).To(Equal("valid-microsoft-token"))
 			})
@@ -180,7 +180,7 @@ var _ = Describe("Token", func() {
 
 			It("returns a bad request error", func() {
 				Expect(res.StatusCode).To(Equal(http.StatusBadRequest))
-				b, _ := ioutil.ReadAll(res.Body)
+				b, _ := io.ReadAll(res.Body)
 				_ = json.Unmarshal(b, &tokens)
 				Expect(tokens.Error).To(Equal("Unsupported token provider: rancher"))
 			})
@@ -193,7 +193,7 @@ var _ = Describe("Token", func() {
 
 			It("returns an internal server error", func() {
 				Expect(res.StatusCode).To(Equal(http.StatusInternalServerError))
-				b, _ := ioutil.ReadAll(res.Body)
+				b, _ := io.ReadAll(res.Body)
 				_ = json.Unmarshal(b, &tokens)
 				Expect(tokens.Error).To(Equal("error getting token from rancher"))
 			})
@@ -202,7 +202,7 @@ var _ = Describe("Token", func() {
 		When("it succeeds", func() {
 			It("succeeds", func() {
 				Expect(res.StatusCode).To(Equal(http.StatusOK))
-				b, _ := ioutil.ReadAll(res.Body)
+				b, _ := io.ReadAll(res.Body)
 				_ = json.Unmarshal(b, &tokens)
 				Expect(tokens.Token).To(Equal("valid-rancher-token"))
 			})
