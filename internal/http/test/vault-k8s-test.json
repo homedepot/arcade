@@ -1,0 +1,6 @@
+{
+  "name": "vault-k8s-test",
+  "type": "vault-k8s",
+  "password": "VAULT-TOKEN",
+  "url": "vault-url"
+}
