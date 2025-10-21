@@ -63,7 +63,8 @@ var _ = Describe("Token", func() {
 
 	AfterEach(func() {
 		svr.Close()
-		res.Body.Close()
+		err = res.Body.Close()
+		Expect(err).ToNot(HaveOccurred())
 	})
 
 	JustBeforeEach(func() {

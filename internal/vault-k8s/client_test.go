@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	. "github.com/homedepot/arcade/internal/vault-k8s"
+	vaultk8s "github.com/homedepot/arcade/internal/vault-k8s"
 	. "github.com/onsi/ginkgo"
 
 	. "github.com/onsi/gomega"
@@ -15,7 +15,7 @@ import (
 var _ = Describe("Client", func() {
 	var (
 		server   *ghttp.Server
-		client   *Client
+		client   *vaultk8s.Client
 		password string
 		token    string
 		err      error
@@ -25,7 +25,7 @@ var _ = Describe("Client", func() {
 	BeforeEach(func() {
 		server = ghttp.NewServer()
 		password = "test-vault-token"
-		client = NewClient()
+		client = vaultk8s.NewClient()
 		client.WithURL(server.URL())
 		client.WithPassword(password)
 		ctx = context.Background()
@@ -44,7 +44,7 @@ var _ = Describe("Client", func() {
 
 		When("it succeeds", func() {
 			BeforeEach(func() {
-				ctx = context.WithValue(ctx, "provider", "vault-k8s-my-cluster")
+				ctx = context.WithValue(ctx, vaultk8s.ProviderKey("provider"), "vault-k8s-my-cluster")
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", "/v1/secret/data/my-cluster/vault-k8s-user"),
@@ -90,7 +90,7 @@ var _ = Describe("Client", func() {
 
 		When("the provider in the context has an invalid format", func() {
 			BeforeEach(func() {
-				ctx = context.WithValue(ctx, "provider", "vault-k8s")
+				ctx = context.WithValue(ctx, vaultk8s.ProviderKey("provider"), "vault-k8s")
 			})
 
 			It("returns an error", func() {
@@ -102,7 +102,7 @@ var _ = Describe("Client", func() {
 
 		When("the secret is not found in vault", func() {
 			BeforeEach(func() {
-				ctx = context.WithValue(ctx, "provider", "vault-k8s-my-cluster")
+				ctx = context.WithValue(ctx, vaultk8s.ProviderKey("provider"), "vault-k8s-my-cluster")
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", "/v1/secret/data/my-cluster/vault-k8s-user"),
@@ -120,7 +120,7 @@ var _ = Describe("Client", func() {
 
 		When("the kubeconfig is not valid json", func() {
 			BeforeEach(func() {
-				ctx = context.WithValue(ctx, "provider", "vault-k8s-my-cluster")
+				ctx = context.WithValue(ctx, vaultk8s.ProviderKey("provider"), "vault-k8s-my-cluster")
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", "/v1/secret/data/my-cluster/vault-k8s-user"),

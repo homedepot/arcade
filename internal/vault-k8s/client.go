@@ -17,6 +17,8 @@ const (
 	ProviderTypeVaultK8s = "vault-k8s"
 )
 
+type ProviderKey string
+
 func NewClient() *Client {
 	return &Client{
 		c: &http.Client{},
@@ -40,18 +42,21 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 		Address:    c.url,
 		HttpClient: c.c,
 	}
+
 	client, err := api.NewClient(config)
 	if err != nil {
 		return "", fmt.Errorf("error creating vault client: %w", err)
 	}
+
 	c.vaultClient = client
 
 	c.vaultClient.SetToken(c.password)
 
 	var cluster_name string
+
 	var ok bool
 
-	if val := ctx.Value("provider"); val != nil {
+	if val := ctx.Value(ProviderKey("provider")); val != nil {
 		if cluster_name, ok = val.(string); !ok {
 			return "", fmt.Errorf("invalid cluster name in context")
 		}
@@ -82,6 +87,7 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("error reading kubeconfig from vault: %w", err)
 	}
+
 	if secret == nil {
 		return "", fmt.Errorf("secret not found at %s", vault_uri.String())
 	}
@@ -92,6 +98,7 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 	}
 
 	var kubeconfigToken KubeconfigToken
+
 	err = json.Unmarshal(jsonBytes, &kubeconfigToken)
 	if err != nil {
 		return "", fmt.Errorf("error unmarshalling secret data: %w", err)

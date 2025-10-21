@@ -22,12 +22,15 @@ func (ctl *Controller) GetToken(c *gin.Context) {
 				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Unsupported token provider: %s", provider)})
 				return
 			}
+
 			t, err := tokenizer.Token(c)
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
 			}
+
 			c.JSON(http.StatusOK, gin.H{"token": t})
+
 			return
 		}
 	}
