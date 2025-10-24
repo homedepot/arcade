@@ -54,7 +54,14 @@ func (c *client) Token(tokenProvider string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer res.Body.Close()
+
+	defer func(){
+                 err := res.Body.Close()
+                 if err != nil {
+                        // Do nothing!
+                        return
+                 }
+        }()
 
 	if res.StatusCode < 200 || res.StatusCode > 399 {
 		return "", fmt.Errorf("error getting token: %s", res.Status)
