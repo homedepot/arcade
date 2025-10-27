@@ -89,7 +89,14 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("microsoft: error doing request for new token: %w", err)
 	}
-	defer res.Body.Close()
+
+	defer func(){
+                 err := res.Body.Close()
+                 if err != nil {
+                        // Do nothing!
+                        return
+                 }
+        }()
 
 	if res.StatusCode < 200 || res.StatusCode > 399 {
 		body, err := io.ReadAll(res.Body)

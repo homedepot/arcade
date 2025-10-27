@@ -19,7 +19,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: "1.21"
+          go-version: "1.25"
 
       - name: Get dependencies
         run: |
@@ -34,11 +34,11 @@ jobs:
         run: go mod verify
 
       - name: lint
-        uses: golangci/golangci-lint-action@v4
+        uses: golangci/golangci-lint-action@v8
         with:
           # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
-          version: v1.55
-          args: --skip-files .*_test.go --enable wsl --enable misspell --out-format=colored-line-number --timeout 180s
+          version: v2.5.0
+          args: --enable wsl --enable misspell --timeout 180s
 
       - name: Build
         run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v cmd/arcade/arcade.go
@@ -46,7 +46,8 @@ jobs:
       - name: Test
         run: go test -v ./...
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: build
           path: arcade
+          overwrite: true

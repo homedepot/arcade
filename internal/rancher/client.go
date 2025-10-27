@@ -92,7 +92,14 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 			log.Printf("Do(%s), err=%s\n", c.url, err)
 			return "", err
 		}
-		defer res.Body.Close()
+
+	        defer func(){
+                        err := res.Body.Close()
+                        if err != nil {
+                                // Do nothing!
+                                return
+                        }
+                }()
 
 		if res.StatusCode != http.StatusCreated {
 			buf := make([]byte, 100)
