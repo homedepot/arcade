@@ -12,11 +12,24 @@ import (
 	"time"
 )
 
-type NewTokenRequest struct {
-	ResponseType string `json:"responseType"`
-	Username     string `json:"username"`
-	Password     string `json:"password"`
-}
+type (
+	Client struct {
+		c               *http.Client
+		cachedToken     KubeconfigToken
+		mux             sync.Mutex
+		password        string
+		shortExpiration int // seconds for the expiration
+		timeout         time.Duration
+		url             string
+		username        string
+	}
+
+	NewTokenRequest struct {
+		ResponseType string `json:"responseType"`
+		Username     string `json:"username"`
+		Password     string `json:"password"`
+	}
+)
 
 var (
 	errNotFoundFormat = "error getting token: %s"
@@ -24,40 +37,11 @@ var (
 
 func NewClient() *Client {
 	return &Client{
-		c: &http.Client{},
+		c: http.DefaultClient,
 	}
 }
 
-func (c *Client) tokenExpired() bool {
-	tokenExpired := c.shortExpiration > 0 && int(time.Since(c.cachedToken.Created.In(time.UTC)).Seconds()) > c.shortExpiration
-
-	expiredAtString := c.cachedToken.ExpiresAt
-	if expiredAtString == "" {
-		return time.Now().In(time.UTC).After(time.UnixMilli(c.cachedToken.CreatedTS+int64(c.cachedToken.TTL))) || c.cachedToken.Token == "" || tokenExpired
-	}
-
-	// parse the expiration time in RFC3339 format
-	expiredAt, _ := time.Parse(time.RFC3339, expiredAtString)
-
-	// calculate whether the token is expired based on the parsed time
-	isExpired := time.Now().In(time.UTC).After(expiredAt) || tokenExpired
-
-	// return the result with an additional check for empty token
-	return isExpired || c.cachedToken.Token == ""
-}
-
-type Client struct {
-	c               *http.Client
-	cachedToken     KubeconfigToken
-	mux             sync.Mutex
-	password        string
-	shortExpiration int // seconds for the expiration
-	timeout         time.Duration
-	url             string
-	username        string
-}
-
-func (c *Client) Token(ctx context.Context) (string, error) {
+func (c *Client) Token(ctx context.Context) (string, error) { //nolint:gocognit
 	c.mux.Lock()
 	defer c.mux.Unlock()
 
@@ -92,7 +76,12 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 			log.Printf("Do(%s), err=%s\n", c.url, err)
 			return "", err
 		}
-		defer res.Body.Close()
+
+		defer func() {
+			if err := res.Body.Close(); err != nil {
+				log.Printf("rancher client: failed to close response body: %v", err)
+			}
+		}()
 
 		if res.StatusCode != http.StatusCreated {
 			buf := make([]byte, 100)
@@ -117,6 +106,24 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 	}
 
 	return c.cachedToken.Token, nil
+}
+
+func (c *Client) tokenExpired() bool {
+	tokenExpired := c.shortExpiration > 0 && int(time.Since(c.cachedToken.Created.In(time.UTC)).Seconds()) > c.shortExpiration
+
+	expiredAtString := c.cachedToken.ExpiresAt
+	if expiredAtString == "" {
+		return time.Now().In(time.UTC).After(time.UnixMilli(c.cachedToken.CreatedTS+int64(c.cachedToken.TTL))) || c.cachedToken.Token == "" || tokenExpired
+	}
+
+	// parse the expiration time in RFC3339 format
+	expiredAt, _ := time.Parse(time.RFC3339, expiredAtString)
+
+	// calculate whether the token is expired based on the parsed time
+	isExpired := time.Now().In(time.UTC).After(expiredAt) || tokenExpired
+
+	// return the result with an additional check for empty token
+	return isExpired || c.cachedToken.Token == ""
 }
 
 // WithPassword sets the password.

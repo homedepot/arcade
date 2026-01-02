@@ -1,0 +1,57 @@
+version: "2"
+
+linters:
+  enable:
+    - wsl_v5
+    - gocognit
+    - gocyclo
+    - cyclop
+
+  settings:
+    wsl_v5:
+      allow-first-in-block: true
+      allow-whole-block: false
+      branch-max-lines: 2
+
+    gocognit:
+      min-complexity: 15
+
+    gocyclo:
+      min-complexity: 15
+
+    cyclop:
+      max-complexity: 15
+      package-average: 10.0
+
+    lll:
+      line-length: 120
+
+    misspell:
+      ignore-words:
+        - noteable
+
+  exclusions:
+    rules:
+      - linters:
+          - staticcheck
+        text: "ST1005"
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  disable:
+    - gci
+
+output:
+  formats:
+    text:
+      print-issued-lines: false
+      color: true
+
+run:
+  timeout: 3m
+  issues-exit-code: 1
+  tests: false
+  concurrency: 8
+  allow-parallel-runners: true

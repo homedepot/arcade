@@ -16,4 +16,4 @@ setup:
 	go mod verify; \
 
 lint:
-	golangci-lint run --skip-files .*_test.go --enable wsl --enable misspell --timeout 180s
+	golangci-lint run

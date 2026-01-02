@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 )
@@ -54,7 +55,12 @@ func (c *client) Token(tokenProvider string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer res.Body.Close()
+
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			log.Printf("arcade client: failed to close response body: %v", err)
+		}
+	}()
 
 	if res.StatusCode < 200 || res.StatusCode > 399 {
 		return "", fmt.Errorf("error getting token: %s", res.Status)

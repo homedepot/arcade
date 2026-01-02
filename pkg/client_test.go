@@ -1,122 +1,97 @@
 package arcade_test
 
 import (
+	"encoding/json"
 	"net/http"
+	"net/http/httptest"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	. "github.com/homedepot/arcade/pkg"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	"github.com/onsi/gomega/ghttp"
 )
 
-var _ = Describe("Client", func() {
-	var (
-		server   *ghttp.Server
-		client   Client
-		err      error
-		token    string
-		provider string
-	)
+func TestNewDefaultClient(t *testing.T) {
+	_ = NewDefaultClient("test-api-key")
+}
 
-	BeforeEach(func() {
-		provider = "google"
-		server = ghttp.NewServer()
-		client = NewClient(server.URL(), "test-api-key")
+func TestClient_Token(t *testing.T) {
+	t.Run("uri is invalid", func(t *testing.T) {
+		client := NewClient("::haha", "test-api-key")
+		_, err := client.Token("google")
+		assert.Error(t, err)
 	})
 
-	AfterEach(func() {
-		server.Close()
+	t.Run("server is not reachable", func(t *testing.T) {
+		s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+		url := s.URL
+		s.Close()
+
+		client := NewClient(url, "test-api-key")
+		_, err := client.Token("google")
+		assert.Error(t, err)
 	})
 
-	Describe("#NewDefaultClient", func() {
-		BeforeEach(func() {
-			client = NewDefaultClient("test-api-key")
-		})
+	t.Run("response is not 2XX", func(t *testing.T) {
+		s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusInternalServerError)
+		}))
+		t.Cleanup(s.Close)
 
-		It("succeeds", func() {
-		})
+		client := NewClient(s.URL, "test-api-key")
+		_, err := client.Token("google")
+
+		assert.Error(t, err)
+		assert.Equal(t, "error getting token: 500 Internal Server Error", err.Error())
 	})
 
-	Describe("#Token", func() {
-		JustBeforeEach(func() {
-			token, err = client.Token(provider)
-		})
+	t.Run("server returns bad data", func(t *testing.T) {
+		s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write([]byte(";{["))
+		}))
+		t.Cleanup(s.Close)
 
-		When("the uri is invalid", func() {
-			BeforeEach(func() {
-				client = NewClient("::haha", "test-api-key")
-			})
+		client := NewClient(s.URL, "test-api-key")
+		_, err := client.Token("google")
 
-			It("returns an error", func() {
-				Expect(err).ToNot(BeNil())
-			})
-		})
-
-		When("the server is not reachable", func() {
-			BeforeEach(func() {
-				server.Close()
-			})
-
-			It("returns an error", func() {
-				Expect(err).ToNot(BeNil())
-			})
-		})
-
-		When("the response is not 2XX", func() {
-			BeforeEach(func() {
-				server.AppendHandlers(
-					ghttp.RespondWith(http.StatusInternalServerError, nil),
-				)
-			})
-
-			It("returns an error", func() {
-				Expect(err).ToNot(BeNil())
-				Expect(err.Error()).To(Equal("error getting token: 500 Internal Server Error"))
-			})
-		})
-
-		When("the server returns bad data", func() {
-			BeforeEach(func() {
-				server.AppendHandlers(
-					ghttp.RespondWith(http.StatusOK, ";{["),
-				)
-			})
-
-			It("returns an error", func() {
-				Expect(err).ToNot(BeNil())
-				Expect(err.Error()).To(Equal("invalid character ';' looking for beginning of value"))
-			})
-		})
-
-		When("provider is rancher", func() {
-			BeforeEach(func() {
-				provider = "rancher"
-				server.AppendHandlers(ghttp.CombineHandlers(
-					ghttp.VerifyHeaderKV("api-key", "test-api-key"),
-					ghttp.VerifyRequest(http.MethodGet, "/tokens", "provider=rancher"),
-					ghttp.RespondWith(http.StatusOK, `{"token":"some.bearer.token"}`),
-				))
-			})
-
-			It("succeeds", func() {
-				Expect(err).To(BeNil())
-				Expect(token).To(Equal("some.bearer.token"))
-			})
-		})
-
-		When("it succeeds", func() {
-			BeforeEach(func() {
-				server.AppendHandlers(ghttp.CombineHandlers(
-					ghttp.VerifyHeaderKV("api-key", "test-api-key"),
-					ghttp.VerifyRequest(http.MethodGet, "/tokens", "provider=google"),
-					ghttp.RespondWith(http.StatusOK, `{"token":"some.bearer.token"}`),
-				))
-			})
-
-			It("succeeds", func() {
-				Expect(err).To(BeNil())
-				Expect(token).To(Equal("some.bearer.token"))
-			})
-		})
+		assert.Error(t, err)
+		assert.Equal(t, "invalid character ';' looking for beginning of value", err.Error())
 	})
-})
+
+	t.Run("provider is rancher", func(t *testing.T) {
+		s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "test-api-key", r.Header.Get("api-key"))
+			assert.Equal(t, "/tokens", r.URL.Path)
+			assert.Equal(t, "rancher", r.URL.Query().Get("provider"))
+
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]string{"token": "some.bearer.token"})
+		}))
+		t.Cleanup(s.Close)
+
+		client := NewClient(s.URL, "test-api-key")
+		token, err := client.Token("rancher")
+
+		assert.NoError(t, err)
+		assert.Equal(t, "some.bearer.token", token)
+	})
+
+	t.Run("it succeeds", func(t *testing.T) {
+		s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			assert.Equal(t, "test-api-key", r.Header.Get("api-key"))
+			assert.Equal(t, "/tokens", r.URL.Path)
+			assert.Equal(t, "google", r.URL.Query().Get("provider"))
+
+			w.Header().Set("Content-Type", "application/json")
+			_ = json.NewEncoder(w).Encode(map[string]string{"token": "some.bearer.token"})
+		}))
+		t.Cleanup(s.Close)
+
+		client := NewClient(s.URL, "test-api-key")
+		token, err := client.Token("google")
+
+		assert.NoError(t, err)
+		assert.Equal(t, "some.bearer.token", token)
+	})
+}
