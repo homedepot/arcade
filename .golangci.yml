@@ -27,7 +27,7 @@ linters:
       line-length: 120
 
     misspell:
-      ignore-words:
+      ignore-rules:
         - noteable
 
   exclusions:
@@ -40,14 +40,12 @@ formatters:
   enable:
     - gofmt
     - goimports
-  disable:
     - gci
 
 output:
   formats:
     text:
-      print-issued-lines: false
-      color: true
+      colors: true
 
 run:
   timeout: 3m
