@@ -68,7 +68,6 @@ func WithTokenizers(t map[string]Tokenizer) Option {
 }
 
 // GetToken returns a new access token for a given provider.
-// GetToken returns a new access token for a given provider.
 func (h *Handler) GetToken(w http.ResponseWriter, r *http.Request) {
 	provider := r.URL.Query().Get("provider")
 	if provider == "" {

@@ -120,13 +120,12 @@ func buildTokenizer(p Provider, timeout time.Duration) (api.Tokenizer, error) { 
 			return nil, fmt.Errorf("microsoft token provider file %s missing required \"loginEndpoint\" attribute", p.Name)
 		}
 
-		client := microsoft.NewClient(
-			microsoft.WithClientID(p.ClientID),
-			microsoft.WithClientSecret(p.ClientSecret),
-			microsoft.WithResource(p.Resource),
-			microsoft.WithLoginEndpoint(p.LoginEndpoint),
-			microsoft.WithTimeout(timeout),
-		)
+		client := microsoft.NewClient()
+		client.WithClientID(p.ClientID)
+		client.WithClientSecret(p.ClientSecret)
+		client.WithResource(p.Resource)
+		client.WithLoginEndpoint(p.LoginEndpoint)
+		client.WithTimeout(timeout)
 
 		return client, nil
 

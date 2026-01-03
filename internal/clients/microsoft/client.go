@@ -48,58 +48,40 @@ type (
 		CorrelationID    string `json:"correlation_id"`
 		ErrorURI         string `json:"error_uri"`
 	}
-
-	Option func(*Client)
 )
 
 // NewClient returns an implementation of Client using a default http client.
-func NewClient(opts ...Option) *Client {
-	c := &Client{
+func NewClient() *Client {
+	return &Client{
 		c:          http.DefaultClient,
 		expiration: time.Time{}, // Reset expiration for a new client instance.
 	}
-
-	for _, opt := range opts {
-		opt(c)
-	}
-
-	return c
 }
 
 // WithClientID sets the client ID.
-func WithClientID(clientID string) Option {
-	return func(c *Client) {
-		c.clientID = clientID
-	}
+func (c *Client) WithClientID(clientID string) {
+	c.clientID = clientID
 }
 
 // WithClientSecret sets the client secret.
-func WithClientSecret(clientSecret string) Option {
-	return func(c *Client) {
-		c.clientSecret = clientSecret
-	}
+func (c *Client) WithClientSecret(clientSecret string) {
+	c.clientSecret = clientSecret
 }
 
 // WithLoginEndpoint sets the login endpoint, for example
 // 'https://login.microsoftonline.com/someone.onmicrosoft.com/oauth2/token'.
-func WithLoginEndpoint(loginEndpoint string) Option {
-	return func(c *Client) {
-		c.loginEndpoint = loginEndpoint
-	}
+func (c *Client) WithLoginEndpoint(loginEndpoint string) {
+	c.loginEndpoint = loginEndpoint
 }
 
 // WithResource sets the resource, for example https://graph.microsoft.com.
-func WithResource(resource string) Option {
-	return func(c *Client) {
-		c.resource = resource
-	}
+func (c *Client) WithResource(resource string) {
+	c.resource = resource
 }
 
 // WithTimeout sets the timeout on the http request to retrieve the token.
-func WithTimeout(timeout time.Duration) Option {
-	return func(c *Client) {
-		c.timeout = timeout
-	}
+func (c *Client) WithTimeout(timeout time.Duration) {
+	c.timeout = timeout
 }
 
 // Token returns a cached token if it has not expired, otherwise it
