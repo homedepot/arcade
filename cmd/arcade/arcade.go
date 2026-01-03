@@ -1,55 +1,47 @@
 package main
 
 import (
+	"context"
 	"log"
-	"os"
+	"time"
 
-	"github.com/gin-gonic/gin"
-	arcadehttp "github.com/homedepot/arcade/internal/http"
-	"github.com/homedepot/arcade/internal/middleware"
+	"github.com/homedepot/arcade/internal/api"
+	"github.com/homedepot/arcade/internal/api/providers"
+	"github.com/sethvargo/go-envconfig"
 )
 
-var (
-	r = gin.Default()
+type (
+	Config struct {
+		APIKey          string `env:"ARCADE_API_KEY, required"`
+		ConfigDirectory string `env:"ARCADE_CONFIG_DIRECTORY"`
+		Port            int    `env:"PORT, default=1982"`
+	}
 )
 
-func init() {
-	gin.ForceConsoleColor()
+func main() {
+	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile)
 
-	var (
-		controller arcadehttp.Controller
-		err        error
-	)
-
-	if dir := os.Getenv("ARCADE_CONFIG_DIRECTORY"); dir != "" {
-		controller, err = arcadehttp.NewController(dir)
-	} else {
-		controller, err = arcadehttp.NewDefaultController()
+	var cfg Config
+	if err := envconfig.Process(context.Background(), &cfg); err != nil {
+		log.Fatalf("failed to load environment variables: %v", err)
 	}
 
+	tokenizers, err := providers.LoadTokenizersFromDir(
+		cfg.ConfigDirectory,
+		time.Second*api.DefaultTimeoutSeconds,
+	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	apiKey := mustGetenv("ARCADE_API_KEY")
-	r.Use(middleware.NewAPIKeyAuth(apiKey))
+	apiHandler := api.NewHandler(
+		api.WithAPIKey(cfg.APIKey),
+		api.WithTokenizers(tokenizers),
+	)
 
-	r.GET("/tokens", controller.GetToken)
-}
+	server := api.NewServer(api.WithPort(cfg.Port), api.WithHandler(apiHandler))
 
-func mustGetenv(env string) (s string) {
-	if s = os.Getenv(env); s == "" {
-		log.Fatal(env + " not set; exiting.")
-	}
-
-	return
-}
-
-// Run arcade on port 1982.
-func main() {
-	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds | log.Lshortfile)
-
-	if err := r.Run(":1982"); err != nil {
+	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
 }

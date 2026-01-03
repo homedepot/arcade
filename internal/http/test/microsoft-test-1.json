@@ -1,8 +1,0 @@
-{
-  "name": "microsoft-test-1",
-  "type": "microsoft",
-  "clientId": "microsoft-test-1-client-id",
-  "clientSecret": "microsoft-test-1-client-secret",
-  "resource": "microsoft-test-1-resource",
-  "loginEndpoint": "microsoft-test-1-loginEndpoint"
-}

@@ -18,11 +18,11 @@ var (
 	cachedToken *oauth2.Token
 )
 
+type Client struct{}
+
 func NewClient() *Client {
 	return &Client{}
 }
-
-type Client struct{}
 
 func (*Client) Token(ctx context.Context) (string, error) {
 	mux.Lock()

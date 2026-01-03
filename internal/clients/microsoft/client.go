@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -14,19 +15,40 @@ import (
 )
 
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . Client
+type (
+	// Client makes a request for a client token.
+	Client struct {
+		c             *http.Client
+		cachedToken   string
+		clientID      string
+		clientSecret  string
+		expiration    time.Time
+		loginEndpoint string
+		mux           sync.Mutex
+		resource      string
+		timeout       time.Duration
+	}
 
-// Client makes a request for a client token.
-type Client struct {
-	c             *http.Client
-	cachedToken   string
-	clientID      string
-	clientSecret  string
-	expiration    time.Time
-	loginEndpoint string
-	mux           sync.Mutex
-	resource      string
-	timeout       time.Duration
-}
+	token struct {
+		TokenType    string `json:"token_type"`
+		ExpiresIn    string `json:"expires_in"`
+		ExtExpiresIn string `json:"ext_expires_in"`
+		ExpiresOn    string `json:"expires_on"`
+		NotBefore    string `json:"not_before"`
+		Resource     string `json:"resource"`
+		AccessToken  string `json:"access_token"`
+	}
+
+	errorResponse struct {
+		Error            string `json:"error"`
+		ErrorDescription string `json:"error_description"`
+		ErrorCodes       []int  `json:"error_codes"`
+		Timestamp        string `json:"timestamp"`
+		TraceID          string `json:"trace_id"`
+		CorrelationID    string `json:"correlation_id"`
+		ErrorURI         string `json:"error_uri"`
+	}
+)
 
 // NewClient returns an implementation of Client using a default http client.
 func NewClient() *Client {
@@ -36,24 +58,30 @@ func NewClient() *Client {
 	}
 }
 
-type token struct {
-	TokenType    string `json:"token_type"`
-	ExpiresIn    string `json:"expires_in"`
-	ExtExpiresIn string `json:"ext_expires_in"`
-	ExpiresOn    string `json:"expires_on"`
-	NotBefore    string `json:"not_before"`
-	Resource     string `json:"resource"`
-	AccessToken  string `json:"access_token"`
+// WithClientID sets the client ID.
+func (c *Client) WithClientID(clientID string) {
+	c.clientID = clientID
 }
 
-type errorResponse struct {
-	Error            string `json:"error"`
-	ErrorDescription string `json:"error_description"`
-	ErrorCodes       []int  `json:"error_codes"`
-	Timestamp        string `json:"timestamp"`
-	TraceID          string `json:"trace_id"`
-	CorrelationID    string `json:"correlation_id"`
-	ErrorURI         string `json:"error_uri"`
+// WithClientSecret sets the client secret.
+func (c *Client) WithClientSecret(clientSecret string) {
+	c.clientSecret = clientSecret
+}
+
+// WithLoginEndpoint sets the login endpoint, for example
+// 'https://login.microsoftonline.com/someone.onmicrosoft.com/oauth2/token'.
+func (c *Client) WithLoginEndpoint(loginEndpoint string) {
+	c.loginEndpoint = loginEndpoint
+}
+
+// WithResource sets the resource, for example https://graph.microsoft.com.
+func (c *Client) WithResource(resource string) {
+	c.resource = resource
+}
+
+// WithTimeout sets the timeout on the http request to retrieve the token.
+func (c *Client) WithTimeout(timeout time.Duration) {
+	c.timeout = timeout
 }
 
 // Token returns a cached token if it has not expired, otherwise it
@@ -89,7 +117,12 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("microsoft: error doing request for new token: %w", err)
 	}
-	defer res.Body.Close()
+
+	defer func() {
+		if err := res.Body.Close(); err != nil {
+			log.Printf("microsoft client: failed to close response body: %v", err)
+		}
+	}()
 
 	if res.StatusCode < 200 || res.StatusCode > 399 {
 		body, err := io.ReadAll(res.Body)
@@ -129,30 +162,4 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 	c.expiration = time.Now().In(time.UTC).Add(time.Second * time.Duration((expiresIn/10)*9))
 
 	return c.cachedToken, nil
-}
-
-// WithClientID sets the client ID.
-func (c *Client) WithClientID(clientID string) {
-	c.clientID = clientID
-}
-
-// WithClientSecret sets the client secret.
-func (c *Client) WithClientSecret(clientSecret string) {
-	c.clientSecret = clientSecret
-}
-
-// WithLoginEndpoint sets the login endpoint, for example
-// 'https://login.microsoftonline.com/someone.onmicrosoft.com/oauth2/token'.
-func (c *Client) WithLoginEndpoint(loginEndpoint string) {
-	c.loginEndpoint = loginEndpoint
-}
-
-// WithResource sets the resource, for example https://graph.microsoft.com.
-func (c *Client) WithResource(resource string) {
-	c.resource = resource
-}
-
-// WithTimeout sets the timeout on the http request to retrieve the token.
-func (c *Client) WithTimeout(timeout time.Duration) {
-	c.timeout = timeout
 }
