@@ -56,7 +56,7 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 
 	var ok bool
 
-	if val := ctx.Value(ProviderKey("provider")); val != nil {
+	if val := ctx.Value("provider"); val != nil {
 		if cluster_name, ok = val.(string); !ok {
 			return "", fmt.Errorf("invalid cluster name in context")
 		}
