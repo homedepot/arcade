@@ -11,13 +11,12 @@ import (
 	"sync"
 
 	"github.com/hashicorp/vault/api"
+	"github.com/homedepot/arcade/pkg/provider"
 )
 
 const (
 	ProviderTypeVaultK8s = "vault-k8s"
 )
-
-type ProviderKey string
 
 func NewClient() *Client {
 	return &Client{
@@ -56,7 +55,7 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 
 	var ok bool
 
-	if val := ctx.Value("provider"); val != nil {
+	if val := ctx.Value(provider.ProviderKey); val != nil {
 		if cluster_name, ok = val.(string); !ok {
 			return "", fmt.Errorf("invalid cluster name in context")
 		}
