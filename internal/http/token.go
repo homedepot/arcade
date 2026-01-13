@@ -26,6 +26,7 @@ func (ctl *Controller) GetToken(c *gin.Context) {
 
 			ctx := context.WithValue(c.Request.Context(), provider.ProviderKey, providerName)
 			t, err := tokenizer.Token(ctx)
+			
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 				return
