@@ -96,8 +96,7 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 	        defer func(){
                         err := res.Body.Close()
                         if err != nil {
-                                // Do nothing!
-                                return
+				log.Printf("arcade: rancher-client: error closing response body: %s\n", err.Error())
                         }
                 }()
 

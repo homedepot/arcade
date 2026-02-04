@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"log"
 )
 
 //go:generate go run github.com/maxbrunsfeld/counterfeiter/v6 . Client
@@ -93,8 +94,7 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 	defer func(){
                  err := res.Body.Close()
                  if err != nil {
-                        // Do nothing!
-                        return
+			log.Printf("arcade: microsoft-client: error closing response body: %s\n", err.Error())
                  }
         }()
 

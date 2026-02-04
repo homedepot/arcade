@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"log"
 )
 
 const (
@@ -58,8 +59,7 @@ func (c *client) Token(tokenProvider string) (string, error) {
 	defer func(){
                  err := res.Body.Close()
                  if err != nil {
-                        // Do nothing!
-                        return
+                        log.Printf("arcade: arcade-client: error closing response body: %s\n", err.Error())
                  }
         }()
 
