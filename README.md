@@ -9,6 +9,7 @@ Arcade supports the following authorization token providers:
 1. Google
 2. Microsoft
 3. Rancher
+4. Vault K8s
 
 Token provider configuration files containing the credentials are placed in the `ARCADE_CONFIG_DIRECTORY` directory (default location is `/secret/arcade/providers`)
 
@@ -55,6 +56,21 @@ Use this JSON structure to configure a Rancher token provider
 
 Rancher kubeconfig tokens have an expiration time and Arcade will cache the token until it has expired before calling Rancher for a new one.
 
+### Vault K8s
+
+Use this JSON structure to configure a Vault K8s token provider
+
+```json5
+{
+  type: "", // Required, set to 'vault-k8s'
+  name: "", // Required, set to a unique name identifying this token provider
+  url: "", // Required, set to the URL of your Vault instance
+  password: "", // Required, set to your Vault token
+}
+```
+
+The Vault K8s provider retrieves a kubeconfig token from a Vault instance. The path to the secret in Vault is constructed using the `VAULT_K8S_PATH_PATTERN` environment variable. The default pattern is `secret/data/[CLUSTER]/kubeconfig`. The `[CLUSTER]` placeholder is replaced by the cluster name provided in the request. The provider name in the request URL is expected to be in the format `vault-k8s-<cluster_name>`.
+
 ## Run Locally
 
 Prerequisites:
@@ -76,6 +92,7 @@ make build
 ```bash
 export ARCADE_API_KEY=test
 export ARCADE_CONFIG_DIRECTORY=/tmp/arcade
+export VAULT_K8S_PATH_PATTERN="secret/data/[CLUSTER]/kubeconfig"
 
 [[ ! -d ${ARCADE_CONFIG_DIRECTORY} ]] && mkdir ${ARCADE_CONFIG_DIRECTORY}
 
@@ -100,6 +117,13 @@ echo '{
   "clientSecret": "<YOUR_CLIENT_SECRET>",
   "resource": "https://graph.microsoft.com"
 }' > ${ARCADE_CONFIG_DIRECTORY}/microsoft.json
+
+echo '{
+  "type": "vault-k8s",
+  "name": "vault-k8s",
+  "url": "https://vault.example.com",
+  "password": "<YOUR_VAULT_TOKEN>"
+}' > ${ARCADE_CONFIG_DIRECTORY}/vault-k8s.json
 
 ./arcade
 ```
@@ -128,4 +152,10 @@ curl localhost:1982/tokens?provider=microsoftonline -H "Api-Key: test"
 
 ```bash
 curl localhost:1982/tokens?provider=rancher.example.com -H "Api-Key: test"
+```
+
+**Vault K8s**
+
+```bash
+curl localhost:1982/tokens?provider=vault-k8s-my-cluster -H "Api-Key: test"
 ```

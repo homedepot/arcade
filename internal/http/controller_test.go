@@ -44,7 +44,8 @@ var _ = Describe("Controller", func() {
 			})
 
 			AfterEach(func() {
-				os.Remove(dir)
+				err = os.Remove(dir)
+				Expect(err).ToNot(HaveOccurred())
 			})
 
 			It("returns an error", func() {
@@ -61,7 +62,8 @@ var _ = Describe("Controller", func() {
 			})
 
 			AfterEach(func() {
-				os.Remove(tmpFile.Name())
+				err = os.Remove(tmpFile.Name())
+				Expect(err).ToNot(HaveOccurred())
 			})
 
 			It("returns an error", func() {
@@ -80,7 +82,8 @@ var _ = Describe("Controller", func() {
 			})
 
 			AfterEach(func() {
-				os.Remove(tmpFile.Name())
+				err = os.Remove(tmpFile.Name())
+				Expect(err).ToNot(HaveOccurred())
 			})
 
 			It("returns an error", func() {
@@ -101,7 +104,8 @@ var _ = Describe("Controller", func() {
 			})
 
 			AfterEach(func() {
-				os.Remove(tmpFile.Name())
+				err = os.Remove(tmpFile.Name())
+				Expect(err).ToNot(HaveOccurred())
 			})
 
 			It("returns an error", func() {
@@ -126,7 +130,8 @@ var _ = Describe("Controller", func() {
 			})
 
 			AfterEach(func() {
-				os.Remove(tmpFile.Name())
+				err = os.Remove(tmpFile.Name())
+				Expect(err).ToNot(HaveOccurred())
 			})
 
 			It("returns an error", func() {
@@ -151,7 +156,8 @@ var _ = Describe("Controller", func() {
 			})
 
 			AfterEach(func() {
-				os.Remove(tmpFile.Name())
+				err = os.Remove(tmpFile.Name())
+				Expect(err).ToNot(HaveOccurred())
 			})
 
 			It("returns an error", func() {
@@ -176,7 +182,8 @@ var _ = Describe("Controller", func() {
 			})
 
 			AfterEach(func() {
-				os.Remove(tmpFile.Name())
+				err = os.Remove(tmpFile.Name())
+				Expect(err).ToNot(HaveOccurred())
 			})
 
 			It("returns an error", func() {
@@ -201,7 +208,8 @@ var _ = Describe("Controller", func() {
 			})
 
 			AfterEach(func() {
-				os.Remove(tmpFile.Name())
+				err = os.Remove(tmpFile.Name())
+				Expect(err).ToNot(HaveOccurred())
 			})
 
 			It("returns an error", func() {
@@ -225,7 +233,8 @@ var _ = Describe("Controller", func() {
 			})
 
 			AfterEach(func() {
-				os.Remove(tmpFile.Name())
+				err = os.Remove(tmpFile.Name())
+				Expect(err).ToNot(HaveOccurred())
 			})
 
 			It("returns an error", func() {
@@ -249,7 +258,8 @@ var _ = Describe("Controller", func() {
 			})
 
 			AfterEach(func() {
-				os.Remove(tmpFile.Name())
+				err = os.Remove(tmpFile.Name())
+				Expect(err).ToNot(HaveOccurred())
 			})
 
 			It("returns an error", func() {
@@ -273,7 +283,8 @@ var _ = Describe("Controller", func() {
 			})
 
 			AfterEach(func() {
-				os.Remove(tmpFile.Name())
+				err = os.Remove(tmpFile.Name())
+				Expect(err).ToNot(HaveOccurred())
 			})
 
 			It("returns an error", func() {

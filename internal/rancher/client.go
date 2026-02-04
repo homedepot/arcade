@@ -92,7 +92,13 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 			log.Printf("Do(%s), err=%s\n", c.url, err)
 			return "", err
 		}
-		defer res.Body.Close()
+
+	        defer func(){
+                        err := res.Body.Close()
+                        if err != nil {
+				log.Printf("arcade: rancher-client: error closing response body: %s\n", err.Error())
+                        }
+                }()
 
 		if res.StatusCode != http.StatusCreated {
 			buf := make([]byte, 100)

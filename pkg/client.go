@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"log"
 )
 
 const (
@@ -54,7 +55,13 @@ func (c *client) Token(tokenProvider string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer res.Body.Close()
+
+	defer func(){
+                 err := res.Body.Close()
+                 if err != nil {
+                        log.Printf("arcade: arcade-client: error closing response body: %s\n", err.Error())
+                 }
+        }()
 
 	if res.StatusCode < 200 || res.StatusCode > 399 {
 		return "", fmt.Errorf("error getting token: %s", res.Status)

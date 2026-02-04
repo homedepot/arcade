@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/homedepot/arcade/internal/google"
+	"github.com/homedepot/arcade/internal/vault-k8s"
 	"github.com/homedepot/arcade/internal/microsoft"
 	"github.com/homedepot/arcade/internal/rancher"
 )
@@ -21,7 +22,8 @@ const (
 	DefaultTimeoutSeconds = 30
 	ProviderTypeRancher   = "rancher"
 	ProviderTypeMicrosoft = "microsoft"
-	ProviderTypeGoogle    = "google"
+	ProviderTypeGoogle     = "google"
+	ProviderTypeVaultK8s   = "vault-k8s"
 )
 
 // Controller holds clients used to grab tokens.
@@ -182,6 +184,19 @@ func NewController(dir string) (Controller, error) {
 				client.WithTimeout(time.Second * DefaultTimeoutSeconds)
 				client.WithShortExpiration(p.ShortExpiration)
 
+				controller.Tokenizers[p.Name] = client
+			case ProviderTypeVaultK8s:
+				if p.Password == "" {
+					return controller, fmt.Errorf("vault-k8s token provider file %s missing required \"password\" attribute", p.Name)
+				}
+
+				if p.URL == "" {
+					return controller, fmt.Errorf("vault-k8s token provider file %s missing required \"url\" attribute", p.Name)
+				}
+
+				client := vaultk8s.NewClient()
+				client.WithPassword(p.Password)
+				client.WithURL(p.URL)
 				controller.Tokenizers[p.Name] = client
 			default:
 				return controller, fmt.Errorf("unsupported token provider type: %s", p.Type)
