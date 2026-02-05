@@ -16,9 +16,9 @@ func (ctl *Controller) GetToken(c *gin.Context) {
 		providerName = "google"
 	}
 
-	if len(providerName) > len(ProviderTypeVaultK8s) {
+	if len(providerName) >= ( len(ProviderTypeVaultK8s) + 3 ) {
 		if providerName[0:len(ProviderTypeVaultK8s)] == ProviderTypeVaultK8s {
-			tokenizer, ok := ctl.Tokenizers[ProviderTypeVaultK8s]
+			tokenizer, ok := ctl.Tokenizers[providerName[0:len(ProviderTypeVaultK8s) + 3]]
 			if !ok {
 				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Unsupported token provider: %s", providerName)})
 				return
