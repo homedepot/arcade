@@ -63,8 +63,9 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 		return "", fmt.Errorf("cluster name not found in context")
 	}
 
-	if len(cluster_name) > len(ProviderTypeVaultK8s) {
-		cluster_name = cluster_name[len(ProviderTypeVaultK8s)+1:]
+	// If the clustername starts with "vault-k8s-" followed by a two character lifecycle code then remove that prefix to obtain the cluster name
+	if len(cluster_name) >= ( len(ProviderTypeVaultK8s) + 3 ) {
+		cluster_name = cluster_name[len(ProviderTypeVaultK8s)+4:]
 	} else {
 		return "", fmt.Errorf("invalid cluster name format")
 	}
