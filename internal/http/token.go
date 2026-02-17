@@ -9,6 +9,10 @@ import (
 	"github.com/homedepot/arcade/pkg/provider"
 )
 
+const (
+	lifecycleWithDash    = 3 // "-XX" = dash + 2-char lifecycle code
+)
+
 // GetToken returns a new access token for a given provider.
 func (ctl *Controller) GetToken(c *gin.Context) {
 	providerName := c.Query("provider")
@@ -16,9 +20,9 @@ func (ctl *Controller) GetToken(c *gin.Context) {
 		providerName = "google"
 	}
 
-	if len(providerName) >= ( len(ProviderTypeVaultK8s) + 3 ) {
+	if len(providerName) >= ( len(ProviderTypeVaultK8s) + lifecycleWithDash ) {
 		if providerName[0:len(ProviderTypeVaultK8s)] == ProviderTypeVaultK8s {
-			tokenizer, ok := ctl.Tokenizers[providerName[0:len(ProviderTypeVaultK8s) + 3]]
+			tokenizer, ok := ctl.Tokenizers[providerName[0:len(ProviderTypeVaultK8s) + lifecycleWithDash]]
 			if !ok {
 				c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Unsupported token provider: %s", providerName)})
 				return

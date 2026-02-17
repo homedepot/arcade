@@ -16,6 +16,8 @@ import (
 
 const (
 	ProviderTypeVaultK8s = "vault-k8s"
+	lifecycleWithDash    = 3 // "-XX" = dash + 2-char lifecycle code
+	prefixToStrip        = 4 // "-XX-" = dash + 2-char lifecycle code + dash
 )
 
 func NewClient() *Client {
@@ -64,8 +66,8 @@ func (c *Client) Token(ctx context.Context) (string, error) {
 	}
 
 	// If the clustername starts with "vault-k8s-" followed by a two character lifecycle code then remove that prefix to obtain the cluster name
-	if len(cluster_name) >= ( len(ProviderTypeVaultK8s) + 3 ) {
-		cluster_name = cluster_name[len(ProviderTypeVaultK8s)+4:]
+	if len(cluster_name) >= ( len(ProviderTypeVaultK8s) + lifecycleWithDash ) {
+		cluster_name = cluster_name[len(ProviderTypeVaultK8s)+prefixToStrip:]
 	} else {
 		return "", fmt.Errorf("invalid cluster name format")
 	}
