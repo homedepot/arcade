@@ -45,7 +45,7 @@ var _ = Describe("Client", func() {
 
 		When("it succeeds", func() {
 			BeforeEach(func() {
-				ctx = context.WithValue(ctx, provider.ProviderKey, "vault-k8s-my-cluster")
+				ctx = context.WithValue(ctx, provider.ProviderKey, "vault-k8s-dv-my-cluster")
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", "/v1/secret/data/my-cluster/vault-k8s-user"),
@@ -103,7 +103,7 @@ var _ = Describe("Client", func() {
 
 		When("the secret is not found in vault", func() {
 			BeforeEach(func() {
-				ctx = context.WithValue(ctx, provider.ProviderKey, "vault-k8s-my-cluster")
+				ctx = context.WithValue(ctx, provider.ProviderKey, "vault-k8s-dv-my-cluster")
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", "/v1/secret/data/my-cluster/vault-k8s-user"),
@@ -121,7 +121,7 @@ var _ = Describe("Client", func() {
 
 		When("the kubeconfig is not valid json", func() {
 			BeforeEach(func() {
-				ctx = context.WithValue(ctx, provider.ProviderKey, "vault-k8s-my-cluster")
+				ctx = context.WithValue(ctx, provider.ProviderKey, "vault-k8s-dv-my-cluster")
 				server.AppendHandlers(
 					ghttp.CombineHandlers(
 						ghttp.VerifyRequest("GET", "/v1/secret/data/my-cluster/vault-k8s-user"),
